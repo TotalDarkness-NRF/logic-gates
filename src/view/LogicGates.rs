@@ -8,7 +8,7 @@ pub fn render() -> impl IntoView {
     let dropped_gates = create_rw_signal::<Vec<LogicGate>>(vec![]);
     view! {
         <Title text="Logic Gates"/>
-        <div style="display: flex; height: 100vh; font-family: sans-serif;">
+        <div style="user-select: none; display: flex; height: 100vh; font-family: sans-serif;" >
             <DragZone />
             <DropZone dropped_gates=dropped_gates />
         </div>
@@ -150,7 +150,7 @@ fn RenderGate(gate: LogicGate, #[prop(default = false)] draggable: bool) -> impl
                 let dt = e.data_transfer().unwrap();
                 dt.set_data("text/plain", gate_str).unwrap();
             }
-            style="padding: 1px; border: 1px solid #888; margin: 1px; background: #fff; cursor: grab;"
+            style="height: 100px; padding: 1px; border: 1px solid #888; margin: 1px; background: #fff; cursor: grab;"
         >
         <RotatableGate gate=gate />
         </div>
