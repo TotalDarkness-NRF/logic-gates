@@ -1,7 +1,7 @@
 use leptos::*;
 use leptos_meta::Title;
 use web_sys::DragEvent;
-use crate::model::logic_gate::LogicGate;
+use crate::model::{gate_type::GateType, logic_gate::LogicGate};
 
 #[component]
 pub fn render() -> impl IntoView {
@@ -15,20 +15,45 @@ pub fn render() -> impl IntoView {
     }
 }
 
+pub fn render_gate(gate_type: GateType) -> View {
+    match gate_type {
+        GateType::And => view! { <AndGate /> }.into_view(),
+        GateType::Or => view! { <OrGate /> }.into_view(),
+        GateType::Not => view! { <NotGate /> }.into_view(),
+        GateType::Nand => view! { <AndGate not=true /> }.into_view(),
+        GateType::Nor => view! { <OrGate not=true /> }.into_view(),
+        GateType::Xor => view! { <XorGate /> }.into_view(),
+        GateType::Xnor => view! { <XorGate not=true /> }.into_view(),
+    }
+}
+
+#[component]
+fn RenderGate(gate: GateType, #[prop(default = false)] draggable: bool) -> impl IntoView {
+    let gate_str = gate.as_str();
+    view! {
+        <div
+            draggable=draggable.to_string()
+            on:dragstart=move |e| {
+                let dt = e.data_transfer().unwrap();
+                dt.set_data("text/plain", gate_str).unwrap();
+            }
+            style="height: 100px; padding: 1px; border: 1px solid #888; margin: 1px; background: #fff; cursor: grab;"
+        >
+        { render_gate(gate) }
+        </div>
+    }
+}
+
 #[component]
 fn RotatableGate(#[prop(default = 0)] angle: i32, gate: LogicGate) -> impl IntoView {
-    let gate_view = match gate {
-        LogicGate::And => view!{<AndGate />},
-        LogicGate::Or => view!{<OrGate />},
-        LogicGate::Not => view!{<NotGate />},
-        LogicGate::Nand => view!{<AndGate not=true/>},
-        LogicGate::Nor => view!{<OrGate not=true />},
-        LogicGate::Xor => view!{<XorGate />},
-        LogicGate::Xnor => view!{<XorGate not=true />},
-    };
+    let x = gate.get_x().unwrap_or(0) + 125 ;
+    let y = gate.get_y().unwrap_or(0) - (125/3);
     view! {
-        <svg width="125" height="125" xmlns="http://www.w3.org/2000/svg">
-            <g transform=format!("rotate({}, 63, 63)", angle)> { gate_view } </g>
+        <svg width="125" height="125" xmlns="http://www.w3.org/2000/svg" style=format!(
+            "position: absolute; left: {}px; top: {}px;", x, y)>
+            <g transform=format!("rotate({}, 63, 63)", angle)>
+                { render_gate(gate.gate_type) }
+            </g>
         </svg>
     }
 }
@@ -139,27 +164,9 @@ fn XorGate(#[prop(default = false)] not: bool) -> impl IntoView {
     }
 }
 
-
-#[component]
-fn RenderGate(gate: LogicGate, #[prop(default = false)] draggable: bool) -> impl IntoView {
-    let gate_str = gate.as_str();
-    view! {
-        <div
-            draggable=draggable.to_string()
-            on:dragstart=move |e| {
-                let dt = e.data_transfer().unwrap();
-                dt.set_data("text/plain", gate_str).unwrap();
-            }
-            style="height: 100px; padding: 1px; border: 1px solid #888; margin: 1px; background: #fff; cursor: grab;"
-        >
-        <RotatableGate gate=gate />
-        </div>
-    }
-}
-
 #[component]
 fn DragZone() -> impl IntoView {
-    let all_gates = LogicGate::get_all_gates();
+    let all_gates = GateType::get_all_gates();
     view! {
         <div style="width: 150px; padding: 10px; border-right: 2px solid #ccc;">
             <h3>"Logic Gates"</h3>
@@ -176,9 +183,13 @@ fn DragZone() -> impl IntoView {
 fn DropZone(dropped_gates: RwSignal<Vec<LogicGate>>) -> impl IntoView {
     let handle_drop = move |e: DragEvent| {
         e.prevent_default();
+        let x = e.offset_x();
+        let y = e.offset_y();
         if let Some(dt) = e.data_transfer() {
             if let Ok(data) = dt.get_data("text/plain") {
-                if let Some(gate) = LogicGate::from_str(&data) {
+                if let Some(gate_type) = GateType::from_str(&data) {
+                    let mut gate = LogicGate::get_logic_gate(gate_type);
+                    gate.set_pos(x, y);
                     dropped_gates.update(|g| g.push(gate));
                 }
             }
@@ -197,7 +208,7 @@ fn DropZone(dropped_gates: RwSignal<Vec<LogicGate>>) -> impl IntoView {
             >
                 <For
                     each=move || dropped_gates.get()
-                    key=|gate| gate.as_str().to_string() + &uuid::Uuid::new_v4().to_string()
+                    key=|gate| gate.gate_type.as_str().to_string() + &uuid::Uuid::new_v4().to_string()
                     children=move |gate| view! {<RotatableGate gate=gate />}
                 />
             </Show>
