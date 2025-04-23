@@ -1,15 +1,16 @@
 use leptos::*;
 use crate::model::{gate_type::GateType, logic_gate::LogicGate};
 
-pub fn render_gate(gate_type: GateType) -> View {
+#[component]
+pub fn RenderGateType(gate_type: GateType) -> impl IntoView {
     match gate_type {
-        GateType::And => view! { <AndGate /> }.into_view(),
-        GateType::Or => view! { <OrGate /> }.into_view(),
-        GateType::Not => view! { <NotGate /> }.into_view(),
-        GateType::Nand => view! { <AndGate not=true /> }.into_view(),
-        GateType::Nor => view! { <OrGate not=true /> }.into_view(),
-        GateType::Xor => view! { <XorGate /> }.into_view(),
-        GateType::Xnor => view! { <XorGate not=true /> }.into_view(),
+        GateType::And => view!{<AndGate />},
+        GateType::Or => view!{<OrGate />},
+        GateType::Not => view!{<NotGate />},
+        GateType::Nand => view!{<AndGate not=true />},
+        GateType::Nor => view!{<OrGate not=true /> },
+        GateType::Xor => view!{<XorGate />},
+        GateType::Xnor => view!{<XorGate not=true />},
     }
 }
 
@@ -25,20 +26,22 @@ pub fn RenderGate(gate: GateType, #[prop(default = false)] draggable: bool) -> i
             }
             style="height: 100px; padding: 1px; border: 1px solid #888; margin: 1px; background: #fff; cursor: grab;"
         >
-        { render_gate(gate) }
+        <RenderGateType gate_type=gate />
         </div>
     }
 }
 
 #[component]
 pub fn RotatableGate(#[prop(default = 0)] angle: i32, gate: LogicGate) -> impl IntoView {
+    // TODO shift by image size, right now its 125
     let x = gate.get_x().unwrap_or(0) + 125;
     let y = gate.get_y().unwrap_or(0) - (125/3);
+    // TODO need ability to drag these gates
     view! {
         <svg width="125" height="125" xmlns="http://www.w3.org/2000/svg" style=format!(
             "position: absolute; left: {}px; top: {}px;", x, y)>
             <g transform=format!("rotate({}, 63, 63)", angle)>
-                { render_gate(gate.gate_type) }
+                <RenderGateType gate_type=gate.gate_type />
             </g>
         </svg>
     }
