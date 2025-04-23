@@ -19,7 +19,7 @@ pub fn App() -> impl IntoView {
             <main>
                 <Routes>
                     <Route path="" view=HomePage::Render/>
-                    <Route path="logic-gates" view=LogicGates::Render/>
+                    <Route path="logic-gates" view=Circuit::Render/>
                     <Route path="/*any" view=NotFound::Render/>
                 </Routes>
             </main>
