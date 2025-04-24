@@ -1,14 +1,19 @@
 use super::gate_type::GateType;
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct LogicGate {
     pub gate_type: GateType,
     pos: Option<(i32, i32)>,
+    id: String,
 }
 
 impl LogicGate {
     pub fn get_logic_gate(gate_type: GateType) -> Self {
-        Self { gate_type, pos: None }
+        Self { gate_type, pos: None, id: uuid::Uuid::new_v4().to_string()}
+    }
+
+    pub fn get_id(&self) -> String {
+        self.id.clone()
     }
 
     pub fn get_x(&self) -> Option<i32> {
