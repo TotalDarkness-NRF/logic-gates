@@ -1,4 +1,5 @@
 use leptos::*;
+use leptos::leptos_dom::logging::console_log;
 use leptos_meta::Title;
 use web_sys::{DragEvent, MouseEvent};
 use crate::model::{gate_type::GateType, logic_gate::LogicGate};
@@ -40,10 +41,21 @@ fn DropZone() -> impl IntoView {
         let y = e.offset_y();
         if let Some(dt) = e.data_transfer() {
             if let Ok(data) = dt.get_data("text/plain") {
-                if let Some(gate_type) = GateType::from_str(&data) {
+                // Try parsing as UUID first (means it's an existing gate)
+                if let Ok(id) = uuid::Uuid::parse_str(&data) {
+                    // Move existing gate
+                    dropped_gates.update(|gates| {
+                        if let Some(gate) = gates.iter_mut().find(|g| g.get_id() == id.to_string()) {
+                            gate.set_pos(x, y);
+                            console_log(format!("Update gate {} to {} {}", gate.get_id(), x, y).as_str())
+                        }
+                    });
+                } else if let Some(gate_type) = GateType::from_str(&data) {
+                    // Create new gate if it's a gate type
                     let mut gate = LogicGate::get_logic_gate(gate_type);
                     gate.set_pos(x, y);
                     dropped_gates.update(|g| g.push(gate));
+                    console_log(format!("Dropped gate {} {}", x, y).as_str())
                 }
             }
         }
@@ -61,7 +73,7 @@ fn DropZone() -> impl IntoView {
             >
                 <For
                     each=move || dropped_gates.get()
-                    key=|gate| gate.gate_type.as_str().to_string() + &uuid::Uuid::new_v4().to_string()
+                    key=|gate| gate.get_id()
                     children=move |gate| view!{<RotatableGate gate draggable=true />}
                 />
             </Show>

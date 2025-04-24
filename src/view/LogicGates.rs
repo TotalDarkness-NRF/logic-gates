@@ -1,4 +1,5 @@
 use leptos::*;
+use leptos::leptos_dom::logging::console_log;
 use crate::model::{gate_type::GateType, logic_gate::LogicGate};
 
 #[component]
@@ -32,24 +33,34 @@ pub fn RenderGate(gate_type: GateType, #[prop(default = false)] draggable: bool)
 }
 
 #[component]
-pub fn RotatableGate(#[prop(default = 0)] angle: i32, #[prop(default = false)] draggable: bool, gate: LogicGate) -> impl IntoView {
-    // TODO shift by image size, right now its 125
-    let x = gate.get_x().unwrap_or(0) + 125;
-    let y = gate.get_y().unwrap_or(0) - (125/3);
-    //let gate_str =  gate.gate_type.as_str();
+pub fn RotatableGate(#[prop(default = 0)] angle: i32, #[prop(default = false)] draggable: bool, mut gate: LogicGate) -> impl IntoView {
+    // TODO really stupid way of moving a gate.
+    // TODO find out if gate is the same gate in the dropped_gate list
+    let (x, set_x) = create_signal(gate.get_x().unwrap_or(0) + 125);
+    let (y, set_y) = create_signal(gate.get_y().unwrap_or(0) - (125/3));
+    let gate_id = gate.get_id();
+    let gate_type = gate.gate_type;
     view! {
         <div
             draggable=draggable.to_string()
-            /*
             on:dragstart=move |e| {
-                let dt = e.data_transfer().unwrap();
-                dt.set_data("text/plain", gate_str).unwrap();
-            }*/
-            style=format!("cursor: grab; position: absolute; left: {}px; top: {}px;", x, y)
+                if let Some(dt) = e.data_transfer() {
+                    dt.set_data("text/plain", gate_id.as_str()).ok();
+                }
+            }
+            on:dragend=move |e| {
+                let new_x = e.client_x();
+                let new_y = e.client_y();
+                gate.set_pos(new_x, new_y);
+                set_x.update(|x| *x = new_x - 125/2);
+                set_y.update(|y| *y = new_y - 125/3);
+            }
+            
+            style=move || format!("cursor: grab; position: absolute; left: {}px; top: {}px;", x.get(), y.get())
         >
             <svg width="125" height="125" xmlns="http://www.w3.org/2000/svg">
                 <g transform=format!("rotate({}, 63, 63)", angle)>
-                    <RenderGateType gate_type=gate.gate_type />
+                    <RenderGateType gate_type />
                 </g>
             </svg>
         </div>
