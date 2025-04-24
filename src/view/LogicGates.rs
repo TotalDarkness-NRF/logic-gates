@@ -15,8 +15,8 @@ pub fn RenderGateType(gate_type: GateType) -> impl IntoView {
 }
 
 #[component]
-pub fn RenderGate(gate: GateType, #[prop(default = false)] draggable: bool) -> impl IntoView {
-    let gate_str = gate.as_str();
+pub fn RenderGate(gate_type: GateType, #[prop(default = false)] draggable: bool) -> impl IntoView {
+    let gate_str = gate_type.as_str();
     view! {
         <div
             draggable=draggable.to_string()
@@ -26,24 +26,33 @@ pub fn RenderGate(gate: GateType, #[prop(default = false)] draggable: bool) -> i
             }
             style="height: 100px; padding: 1px; border: 1px solid #888; margin: 1px; background: #fff; cursor: grab;"
         >
-        <RenderGateType gate_type=gate />
+            <RenderGateType gate_type />
         </div>
     }
 }
 
 #[component]
-pub fn RotatableGate(#[prop(default = 0)] angle: i32, gate: LogicGate) -> impl IntoView {
+pub fn RotatableGate(#[prop(default = 0)] angle: i32, #[prop(default = false)] draggable: bool, gate: LogicGate) -> impl IntoView {
     // TODO shift by image size, right now its 125
     let x = gate.get_x().unwrap_or(0) + 125;
     let y = gate.get_y().unwrap_or(0) - (125/3);
-    // TODO need ability to drag these gates
+    //let gate_str =  gate.gate_type.as_str();
     view! {
-        <svg width="125" height="125" xmlns="http://www.w3.org/2000/svg" style=format!(
-            "position: absolute; left: {}px; top: {}px;", x, y)>
-            <g transform=format!("rotate({}, 63, 63)", angle)>
-                <RenderGateType gate_type=gate.gate_type />
-            </g>
-        </svg>
+        <div
+            draggable=draggable.to_string()
+            /*
+            on:dragstart=move |e| {
+                let dt = e.data_transfer().unwrap();
+                dt.set_data("text/plain", gate_str).unwrap();
+            }*/
+            style=format!("cursor: grab; position: absolute; left: {}px; top: {}px;", x, y)
+        >
+            <svg width="125" height="125" xmlns="http://www.w3.org/2000/svg">
+                <g transform=format!("rotate({}, 63, 63)", angle)>
+                    <RenderGateType gate_type=gate.gate_type />
+                </g>
+            </svg>
+        </div>
     }
 }
 

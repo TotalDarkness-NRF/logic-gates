@@ -8,7 +8,7 @@ use crate::view::LogicGates::{RenderGate, RotatableGate};
 pub fn render() -> impl IntoView {
     view! {
         <Title text="Logic Gates"/>
-        <div style="user-select: none; display: flex; height: 100vh; font-family: sans-serif;" >
+        <div style="user-select: none; display: flex; height: 100vh; font-family: sans-serif;">
             <DragZone />
             <DropZone />
             <CircuitConnector />  
@@ -25,7 +25,7 @@ fn DragZone() -> impl IntoView {
             <For
                 each=move || all_gates.clone()
                 key=|gate| gate.as_str().to_string()
-                children=move |gate| view! {<RenderGate gate=gate draggable=true/>}
+                children=move |gate_type| view! {<RenderGate gate_type draggable=true />}
             />
         </div>
     }
@@ -62,7 +62,7 @@ fn DropZone() -> impl IntoView {
                 <For
                     each=move || dropped_gates.get()
                     key=|gate| gate.gate_type.as_str().to_string() + &uuid::Uuid::new_v4().to_string()
-                    children=move |gate| view! {<RotatableGate gate=gate />}
+                    children=move |gate| view!{<RotatableGate gate draggable=true />}
                 />
             </Show>
         </div>
