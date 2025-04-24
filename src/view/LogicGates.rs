@@ -1,5 +1,4 @@
 use leptos::*;
-use leptos::leptos_dom::logging::console_log;
 use crate::model::{gate_type::GateType, logic_gate::LogicGate};
 
 #[component]
@@ -37,7 +36,7 @@ pub fn RotatableGate(#[prop(default = 0)] angle: i32, #[prop(default = false)] d
     // TODO really stupid way of moving a gate.
     // TODO find out if gate is the same gate in the dropped_gate list
     let (x, set_x) = create_signal(gate.get_x().unwrap_or(0) + 125);
-    let (y, set_y) = create_signal(gate.get_y().unwrap_or(0) - (125/3));
+    let (y, set_y) = create_signal(gate.get_y().unwrap_or(0) + (125/3));
     let gate_id = gate.get_id();
     let gate_type = gate.gate_type;
     view! {

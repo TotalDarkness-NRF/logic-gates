@@ -1,5 +1,4 @@
 use leptos::*;
-use leptos::leptos_dom::logging::console_log;
 use leptos_meta::Title;
 use web_sys::{DragEvent, MouseEvent};
 use crate::model::{gate_type::GateType, logic_gate::LogicGate};
@@ -12,7 +11,6 @@ pub fn render() -> impl IntoView {
         <div style="user-select: none; display: flex; height: 100vh; font-family: sans-serif;">
             <DragZone />
             <DropZone />
-            <CircuitConnector />  
         </div>
     }
 }
@@ -47,7 +45,6 @@ fn DropZone() -> impl IntoView {
                     dropped_gates.update(|gates| {
                         if let Some(gate) = gates.iter_mut().find(|g| g.get_id() == id.to_string()) {
                             gate.set_pos(x, y);
-                            console_log(format!("Update gate {} to {} {}", gate.get_id(), x, y).as_str())
                         }
                     });
                 } else if let Some(gate_type) = GateType::from_str(&data) {
@@ -55,7 +52,6 @@ fn DropZone() -> impl IntoView {
                     let mut gate = LogicGate::get_logic_gate(gate_type);
                     gate.set_pos(x, y);
                     dropped_gates.update(|g| g.push(gate));
-                    console_log(format!("Dropped gate {} {}", x, y).as_str())
                 }
             }
         }
@@ -77,6 +73,7 @@ fn DropZone() -> impl IntoView {
                     children=move |gate| view!{<RotatableGate gate draggable=true />}
                 />
             </Show>
+            <CircuitConnector />
         </div>
     }
 }
@@ -102,10 +99,9 @@ pub fn CircuitConnector() -> impl IntoView {
                 None => set_start_point.set(Some(point)),
             }
         };
-
     view! {
         <svg
-            style="border: 1px solid gray;"
+            style="top: 0; left: 0; width: 100%; height: 100%; z-index: 0;"
             on:mousemove=on_mouse_move
             on:click=on_click
         >
