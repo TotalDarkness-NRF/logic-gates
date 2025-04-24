@@ -108,6 +108,8 @@ pub fn CircuitConnector() -> impl IntoView {
             {move || connections.get().into_iter().map(|((x1, y1), (x2, y2))| {
                 view! {
                     <line x1=x1 y1=y1 x2=x2 y2=y2 stroke="black" stroke-width="2"/>
+                    <circle cx=x1 cy=y1 r="4" fill="black"/>
+                    <circle cx=x2 cy=y2 r="4" fill="black"/>
                 }
             }).collect::<Vec<_>>()}
 
@@ -132,19 +134,23 @@ fn Legend() -> impl IntoView {
             <div style="display: flex; align-items: center; gap: 8px;">
                 <span>"On:"</span>
                 <svg width="120" height="10">
-                    <line x1=0 y1=5 x2=110 y2=5 stroke="green" stroke-width="2"/>
+                    <line x1=0 y1=5 x2=90 y2=5 stroke="green" stroke-width="2"/>
+                    <circle cx=4 cy=5 r="4" fill="black"/>
+                    <circle cx=90 cy=5 r="4" fill="black"/>
                 </svg>
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
                 <span>"Off:"</span>
                 <svg width="120" height="10">
-                    <line x1=0 y1=5 x2=110 y2=5 stroke="black" stroke-width="2"/>
+                    <line x1=0 y1=5 x2=90 y2=5 stroke="black" stroke-width="2"/>
+                    <circle cx=4 cy=5 r="4" fill="black"/>
+                    <circle cx=90 cy=5 r="4" fill="black"/>
                 </svg>
             </div>
             <div style="display: flex; align-items: center; gap: 8px;">
                 <span>"None:"</span>
                 <svg width="120" height="10">
-                    <line x1=0 y1=5 x2=110 y2=5 stroke="red" stroke-dasharray="4"/>
+                    <line x1=0 y1=5 x2=100 y2=5 stroke="red" stroke-dasharray="4"/>
                 </svg>
             </div>
         </div>
